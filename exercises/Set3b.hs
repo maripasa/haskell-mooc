@@ -20,7 +20,6 @@
 -- Feel free to use if-then-else, guards, and ordering functions (< and > etc.).
 --
 -- The tests will check that you haven't added imports :)
-
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Set3b where
@@ -40,7 +39,7 @@ import Mooc.Todo
 
 buildList :: Int -> Int -> Int -> [Int]
 buildList start 0 end = [end]
-buildList start count end = start: buildList start (count-1) end
+buildList start count end = start : buildList start (count - 1) end
 
 ------------------------------------------------------------------------------
 -- Ex 2: given i, build the list of sums [1, 1+2, 1+2+3, .., 1+2+..+i]
@@ -54,7 +53,7 @@ sums i = go 1 0
   where
     go n acc
       | n > i = []
-      | otherwise = (n+acc) : go (n+1) (n+acc)
+      | otherwise = (n + acc) : go (n + 1) (n + acc)
 
 ------------------------------------------------------------------------------
 -- Ex 3: define a function mylast that returns the last value of the
@@ -69,8 +68,16 @@ sums i = go 1 0
 
 mylast :: a -> [a] -> a
 mylast def [] = def
-mylast def (x:[]) = x
-mylast def (x:xs) = mylast def xs
+mylast def (x : []) = x
+mylast def (x : xs) = mylast def xs
+
+-- Oh cool, look at this:
+--
+-- mylast :: a -> [a] -> a
+-- mylast def []     = def
+-- mylast _   (x:xs) = mylast x xs
+--
+-- pretty smart
 
 ------------------------------------------------------------------------------
 -- Ex 4: safe list indexing. Define a function indexDefault so that
@@ -88,9 +95,16 @@ mylast def (x:xs) = mylast def xs
 --   indexDefault ["a","b","c"] (-1) "d" ==> "d"
 
 indexDefault :: [a] -> Int -> a -> a
-indexDefault (x:_) 0 def = x
-indexDefault (x:[]) _ def = def
-indexDefault (x:xs) i def = indexDefault xs (i-1) def
+indexDefault (x : _) 0 def = x
+indexDefault (x : []) _ def = def
+indexDefault (x : xs) i def = indexDefault xs (i - 1) def
+
+-- I didn't need these (x:[]) cases, and I'm missing the [] case in here, even
+--
+-- indexDefault :: [a] -> Int -> a -> a
+-- indexDefault [] _ def = def
+-- indexDefault (x:xs) 0 def = x
+-- indexDefault (x:xs) i def = indexDefault xs (i-1) def
 
 ------------------------------------------------------------------------------
 -- Ex 5: define a function that checks if the given list is in
@@ -107,12 +121,20 @@ indexDefault (x:xs) i def = indexDefault xs (i-1) def
 
 sorted :: [Int] -> Bool
 sorted [] = True
-sorted (x:[]) = True
-sorted (x:y:xs)
-  | x <= y    = sorted (y:xs)
+sorted (x : []) = True
+sorted (x : y : xs)
+  | x <= y = sorted (y : xs)
   | otherwise = False
-  
 
+{-
+sorted :: [Int] -> Bool
+sorted []  = True
+sorted [x] = True
+sorted (x:y:xs)
+  | x>y       = False
+  | otherwise = sorted (y:xs)
+-}
+-- Can't forget you can use [x] or [x,y]
 ------------------------------------------------------------------------------
 -- Ex 6: compute the partial sums of the given list like this:
 --
@@ -123,10 +145,20 @@ sorted (x:y:xs)
 -- Use pattern matching and recursion (and the list constructors : and [])
 
 sumsOf :: [Int] -> [Int]
-sumsOf xs = go xs 0 
+sumsOf xs = go xs 0
   where
     go [] acc = []
-    go (c:cs) acc = (c + acc) : go cs (c + acc)
+    go (c : cs) acc = (c + acc) : go cs (c + acc)
+
+{-
+
+sumsOf :: [Int] -> [Int]
+sumsOf xs = go 0 xs
+  where go acc (x:xs) = (acc+x) : go (acc+x) xs
+        go _   [] = []
+
+simpler
+-}
 
 ------------------------------------------------------------------------------
 -- Ex 7: implement the function merge that merges two sorted lists of
@@ -139,11 +171,11 @@ sumsOf xs = go xs 0
 --   merge [1,1,6] [1,2]   ==> [1,1,1,2,6]
 
 merge :: [Int] -> [Int] -> [Int]
-merge [] xs     = xs
-merge ys []     = ys
-merge (x:xs) (y:ys)
-  | x <= y = x : merge xs (y:ys)
-  | otherwise = y : merge (x:xs) ys
+merge [] xs = xs
+merge ys [] = ys
+merge (x : xs) (y : ys)
+  | x <= y = x : merge xs (y : ys)
+  | otherwise = y : merge (x : xs) ys
 
 ------------------------------------------------------------------------------
 -- Ex 8: compute the biggest element, using a comparison function
@@ -151,9 +183,13 @@ merge (x:xs) (y:ys)
 --
 -- That is, implement the function mymaximum that takes
 --
+
 -- * a function `bigger` :: a -> a -> Bool
+
 -- * a value `initial` of type a
+
 -- * a list `xs` of values of type a
+
 --
 -- and returns the biggest value it sees, considering both `initial`
 -- and all element in `xs`.
@@ -168,9 +204,10 @@ merge (x:xs) (y:ys)
 
 mymaximum :: (a -> a -> Bool) -> a -> [a] -> a
 mymaximum _ initial [] = initial
-mymaximum bigger initial (x:xs)
+mymaximum bigger initial (x : xs)
   | initial `bigger` x = mymaximum bigger initial xs
-  | otherwise        = mymaximum bigger x xs
+  | otherwise = mymaximum bigger x xs
+
 ------------------------------------------------------------------------------
 -- Ex 9: define a version of map that takes a two-argument function
 -- and two lists. Example:
@@ -185,7 +222,13 @@ mymaximum bigger initial (x:xs)
 map2 :: (a -> b -> c) -> [a] -> [b] -> [c]
 map2 f [] bs = []
 map2 f as [] = []
-map2 f (a:as) (b:bs) = f a b : map2 f as bs
+map2 f (a : as) (b : bs) = f a b : map2 f as bs
+
+{-
+map2 :: (a -> b -> c) -> [a] -> [b] -> [c]
+map2 f (a:as) (b:bs) = f a b:map2 f as bs
+map2 f _      _      = []
+-}
 
 ------------------------------------------------------------------------------
 -- Ex 10: implement the function maybeMap, which works a bit like a
@@ -210,5 +253,8 @@ map2 f (a:as) (b:bs) = f a b : map2 f as bs
 
 maybeMap :: (a -> Maybe b) -> [a] -> [b]
 maybeMap _ [] = []
-maybeMap f (x:xs) = case f x of Just a -> a : maybeMap f xs
-                                Nothing -> maybeMap f xs
+maybeMap f (x : xs) = case f x of
+  Just a -> a : maybeMap f xs
+  Nothing -> maybeMap f xs
+
+-- I should try putting the standart on top and the exceptions at the bottom

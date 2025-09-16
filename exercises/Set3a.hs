@@ -5,13 +5,12 @@
 
 module Set3a where
 
-import Mooc.Todo
-
 -- Some imports you'll need.
 -- Do not add any other imports! :)
 import Data.Char
 import Data.Either
 import Data.List
+import Mooc.Todo
 
 ------------------------------------------------------------------------------
 -- Ex 1: implement the function maxBy that takes as argument a
@@ -30,7 +29,7 @@ import Data.List
 maxBy :: (a -> Int) -> a -> a -> a
 maxBy measure a b
   | measure a > measure b = a
-  | otherwise             = b
+  | otherwise = b
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement the function mapMaybe that takes a function and a
@@ -43,7 +42,17 @@ maxBy measure a b
 
 mapMaybe :: (a -> b) -> Maybe a -> Maybe b
 mapMaybe f (Just a) = Just (f a)
-mapMaybe f _        = Nothing
+mapMaybe f _ = Nothing
+
+{-
+They did:
+
+mapMaybe :: (a -> b) -> Maybe a -> Maybe b
+mapMaybe _ Nothing  = Nothing
+mapMaybe f (Just x) = Just (f x)
+
+which works all the same but shows better intent
+-}
 
 ------------------------------------------------------------------------------
 -- Ex 3: implement the function mapMaybe2 that works like mapMaybe
@@ -58,7 +67,7 @@ mapMaybe f _        = Nothing
 
 mapMaybe2 :: (a -> b -> c) -> Maybe a -> Maybe b -> Maybe c
 mapMaybe2 f (Just a) (Just b) = Just (f a b)
-mapMaybe2 _ _ _               = Nothing
+mapMaybe2 _ _ _ = Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 4: define the functions firstHalf and palindrome so that
@@ -86,6 +95,8 @@ firstHalf s = take (div (length s + 1) 2) s
 palindrome :: String -> Bool
 palindrome s = reverse s == s
 
+-- They just did `div`
+
 ------------------------------------------------------------------------------
 -- Ex 5: Implement a function capitalize that takes in a string and
 -- capitalizes the first letter of each word in it.
@@ -103,7 +114,10 @@ palindrome s = reverse s == s
 
 capitalize :: String -> String
 capitalize = unwords . map capFst . words
-  where capFst (x:xs) = toUpper x : xs
+  where
+    capFst (x : xs) = toUpper x : xs
+
+-- They DID use a helper function. I think you should default for that
 
 ------------------------------------------------------------------------------
 -- Ex 6: powers k max should return all the powers of k that are less
@@ -120,7 +134,9 @@ capitalize = unwords . map capFst . words
 --   * the function takeWhile
 
 powers :: Int -> Int -> [Int]
-powers k max = takeWhile (<=max) $ iterate (*k) 1
+powers k max = takeWhile (<= max) $ iterate (* k) 1
+
+-- I initially didn't use iterate, i did map (k^) [0..max] like them, but with lazy it works the same
 
 ------------------------------------------------------------------------------
 -- Ex 7: implement a functional while loop. While should be a function
@@ -142,10 +158,16 @@ powers k max = takeWhile (<=max) $ iterate (*k) 1
 --   in while check tail "xyzAvvt"
 --     ==> Avvt
 
-while :: (a->Bool) -> (a->a) -> a -> a
+while :: (a -> Bool) -> (a -> a) -> a -> a
 while check update value
   | check value = while check update (update value)
-  | otherwise   = value
+  | otherwise = value
+
+-- For some reason they did this:
+-- while :: (a->Bool) -> (a->a) -> a -> a
+-- while check update value
+-- \| not (check value) = value
+-- \| otherwise = while check update (update value)
 
 ------------------------------------------------------------------------------
 -- Ex 8: another version of a while loop. This time, the check
@@ -165,18 +187,19 @@ while check update value
 -- Hint! Remember the case-of expression from lecture 2.
 
 whileRight :: (a -> Either b a) -> a -> b
-whileRight check x = case check x of (Left a) -> a
-                                     (Right a) -> whileRight check a
+whileRight check x = case check x of
+  (Left a) -> a
+  (Right a) -> whileRight check a
 
 -- for the whileRight examples:
 -- step k x doubles x if it's less than k
 step :: Int -> Int -> Either Int Int
-step k x = if x<k then Right (2*x) else Left x
+step k x = if x < k then Right (2 * x) else Left x
 
 -- bomb x implements a countdown: it returns x-1 or "BOOM" if x was 0
 bomb :: Int -> Either String Int
 bomb 0 = Left "BOOM"
-bomb x = Right (x-1)
+bomb x = Right (x - 1)
 
 ------------------------------------------------------------------------------
 -- Ex 9: given a list of strings and a length, return all strings that
@@ -192,6 +215,9 @@ bomb x = Right (x-1)
 joinToLength :: Int -> [String] -> [String]
 joinToLength len xs = filter ((== len) . length) [fst ++ lst | fst <- xs, lst <- xs]
 
+-- OHHHHHH They did what I thought of doing!
+-- joinToLength i xs = [z | x <- xs, y <- xs, let z = x++y, length z == i]
+-- I totally forgot you could make definitions, perfect
 ------------------------------------------------------------------------------
 -- Ex 10: implement the operator +|+ that returns a list with the first
 -- elements of its input lists.
@@ -205,10 +231,16 @@ joinToLength len xs = filter ((== len) . length) [fst ++ lst | fst <- xs, lst <-
 --   [] +|+ []            ==> []
 
 (+|+) :: [a] -> [a] -> [a]
-(x:_) +|+ (y:_) = [x,y]
-(x:_) +|+ []    = [x]
-[]    +|+ (y:_) = [y]
-[]    +|+ []    = []
+(x : _) +|+ (y : _) = [x, y]
+(x : _) +|+ [] = [x]
+[] +|+ (y : _) = [y]
+[] +|+ [] = []
+
+-- They really dragged my face on the ground with this clean one:
+--
+-- (+|+) :: [a] -> [a] -> [a]
+-- xs +|+ ys = take 1 xs ++ take 1 ys
+--
 ------------------------------------------------------------------------------
 -- Ex 11: remember the lectureParticipants example from Lecture 2? We
 -- used a value of type [Either String Int] to store some measurements
@@ -240,8 +272,11 @@ sumRights = sum . map (either (const 0) id)
 --   multiCompose [(3*), (2^), (+1)] 0 ==> 6
 --   multiCompose [(+1), (2^), (3*)] 0 ==> 2
 
+multiCompose :: [a -> a] -> a -> a
 multiCompose [] = id
-multiCompose (f:fs) = f . multiCompose fs
+multiCompose (f : fs) = f . multiCompose fs
+
+-- multiCompose = foldr (.) id (In the future, really missed reduction with some of these)
 
 ------------------------------------------------------------------------------
 -- Ex 13: let's consider another way to compose multiple functions. Given
@@ -298,12 +333,27 @@ multiApp final fs value = final $ map ($ value) fs
 -- function, the surprise won't work. See section 3.8 in the material.
 
 interpreter :: [String] -> [String]
-interpreter fs = interpret 0 0 fs
-  where interpret x y [] = []
-        interpret x y (f:fs) = case f of "up" -> interpret x (y+1) fs
-                                         "down" -> interpret x (y-1) fs
-                                         "left" -> interpret (x-1) y fs
-                                         "right" -> interpret (x+1) y fs
-                                         "printX" -> show x : interpret x y fs
-                                         "printY" -> show y : interpret x y fs
-                       
+interpreter fs = go 0 0 fs
+  where
+    go x y [] = []
+    go x y (f : fs) = case f of
+      "up" -> go x (y + 1) fs
+      "down" -> go x (y - 1) fs
+      "left" -> go (x - 1) y fs
+      "right" -> go (x + 1) y fs
+      "printX" -> show x : go x y fs
+      "printY" -> show y : go x y fs
+
+-- Look at this chonker
+{-
+interpreter :: [String] -> [String]
+interpreter commands = go 0 0 commands
+  where go x y ("up":commands) = go x (y+1) commands
+        go x y ("down":commands) = go x (y-1) commands
+        go x y ("left":commands) = go (x-1) y commands
+        go x y ("right":commands) = go (x+1) y commands
+        go x y ("printX":commands) = show x : go x y commands
+        go x y ("printY":commands) = show y : go x y commands
+        go x y []                  = []
+        go x y (_:commands)        = "BAD" : go x y commands
+-}
