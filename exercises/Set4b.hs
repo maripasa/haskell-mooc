@@ -21,6 +21,7 @@ import Mooc.Todo
 countNothings :: [Maybe a] -> Int
 countNothings xs = foldr countHelper 0 xs
 
+countHelper :: (Num b) => Maybe a -> b -> b
 countHelper item counter = maybe (counter + 1) (const counter) item
 
 ------------------------------------------------------------------------------
@@ -33,8 +34,9 @@ countHelper item counter = maybe (counter + 1) (const counter) item
 
 myMaximum :: [Int] -> Int
 myMaximum [] = 0
-myMaximum (x:xs) = foldr maxHelper x xs
+myMaximum (x : xs) = foldr maxHelper x xs
 
+maxHelper :: (Ord a) => a -> a -> a
 maxHelper num maxi = max num maxi
 
 ------------------------------------------------------------------------------
@@ -48,11 +50,12 @@ maxHelper num maxi = max num maxi
 --   sumAndLength []             ==>  (0.0,0)
 --   sumAndLength [1.0,2.0,4.0]  ==>  (7.0,3)
 
-
-sumAndLength :: [Double] -> (Double,Int)
+sumAndLength :: [Double] -> (Double, Int)
 sumAndLength xs = foldr slHelper slStart xs
 
-slStart = (0.0,0)
+slStart = (0.0, 0)
+
+slHelper :: (Num a, Num b) => a -> (a, b) -> (a, b)
 slHelper value (sum, count) = (sum + value, count + 1)
 
 ------------------------------------------------------------------------------
@@ -68,6 +71,7 @@ myConcat :: [[a]] -> [a]
 myConcat xs = foldr concatHelper concatStart xs
 
 concatStart = []
+
 concatHelper list cur = list ++ cur
 
 ------------------------------------------------------------------------------
@@ -83,10 +87,10 @@ largest :: [Int] -> [Int]
 largest xs = foldr largestHelper [] xs
 
 largestHelper num [] = [num]
-largestHelper num (x:xs) 
+largestHelper num (x : xs)
   | num > x = [num]
-  | num == x = x:xs ++ [x]
-  | otherwise = x:xs
+  | num == x = x : xs ++ [x]
+  | otherwise = x : xs
 
 ------------------------------------------------------------------------------
 -- Ex 6: get the first element of a list with a fold. Define
@@ -101,6 +105,7 @@ largestHelper num (x:xs)
 myHead :: [a] -> Maybe a
 myHead xs = foldr headHelper Nothing xs
 
+headHelper :: a -> p -> Maybe a
 headHelper item _ = Just item
 
 ------------------------------------------------------------------------------
@@ -116,6 +121,7 @@ headHelper item _ = Just item
 myLast :: [a] -> Maybe a
 myLast xs = foldr lastHelper Nothing xs
 
-lastHelper item current = case current of Nothing -> Just item
-                                          (Just _) -> current
-
+lastHelper :: a -> Maybe a -> Maybe a
+lastHelper item current = case current of
+  Nothing -> Just item
+  (Just _) -> current

@@ -16,11 +16,11 @@
 
 module Set4a where
 
-import Mooc.Todo
-import Data.List
-import Data.Ord
-import qualified Data.Map as Map
 import Data.Array
+import Data.List
+import qualified Data.Map as Map
+import Data.Ord
+import Mooc.Todo
 
 ------------------------------------------------------------------------------
 -- Ex 1: implement the function allEqual which returns True if all
@@ -34,9 +34,9 @@ import Data.Array
 -- PS. check out the error message you get with your implementation if
 -- you remove the Eq a => constraint from the type!
 
-allEqual :: Eq a => [a] -> Bool
+allEqual :: (Eq a) => [a] -> Bool
 allEqual [] = True
-allEqual (x:xs) = foldr (\n b -> n == x && b) True xs 
+allEqual (x : xs) = foldr (\n b -> n == x && b) True xs
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement the function distinct which returns True if all
@@ -50,7 +50,7 @@ allEqual (x:xs) = foldr (\n b -> n == x && b) True xs
 --   distinct [1,1,2] ==> False
 --   distinct [1,2] ==> True
 
-distinct :: Eq a => [a] -> Bool
+distinct :: (Eq a) => [a] -> Bool
 distinct xs = nub xs == xs
 
 ------------------------------------------------------------------------------
@@ -121,11 +121,11 @@ longest = foldr go []
 --   incrementKey True [(True,1),(False,3),(True,4)] ==> [(True,2),(False,3),(True,5)]
 --   incrementKey 'a' [('a',3.4)] ==> [('a',4.4)]
 
-incrementKey :: (Num v, Eq k) => k -> [(k,v)] -> [(k,v)]
+incrementKey :: (Num v, Eq k) => k -> [(k, v)] -> [(k, v)]
 incrementKey k xs = map add1 xs
   where
     add1 (k2, v)
-      | k == k2 = (k2, v+1)
+      | k == k2 = (k2, v + 1)
       | otherwise = (k2, v)
 
 ------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ incrementKey k xs = map add1 xs
 -- Hint! you can use the function fromIntegral to convert the list
 -- length to a Fractional
 
-average :: Fractional a => [a] -> a
+average :: (Fractional a) => [a] -> a
 average xs = sum xs / (fromIntegral . length $ xs)
 
 ------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ winner scores player1 player2 = go (Map.lookup player1 scores) (Map.lookup playe
 freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
 freqs = foldr go (Map.fromList [])
   where
-    go a map = Map.alter (Just . maybe 1 (+1)) a map
+    go a map = Map.alter (Just . maybe 1 (+ 1)) a map
 
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
@@ -189,10 +189,15 @@ freqs = foldr go (Map.fromList [])
 -- to another.
 --
 -- However, the function should not perform the transfer if
+
 -- * the from account doesn't exist,
+
 -- * the to account doesn't exist,
+
 -- * the sum is negative,
+
 -- * or the from account doesn't have enough money.
+
 --
 -- Hint: there are many ways to implement this logic. Map.member or
 -- Map.notMember might help.
@@ -212,12 +217,11 @@ transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
 transfer from to amount bank
   | amount < 0 = bank
   | Map.notMember from bank || Map.notMember to bank = bank
-  | otherwise = case Map.lookup from bank of (Just money) -> if money < amount then bank else applyTransfer
-                                             Nothing      -> bank
+  | otherwise = case Map.lookup from bank of
+      (Just money) -> if money < amount then bank else applyTransfer
+      Nothing -> bank
   where
     applyTransfer = Map.adjust (\v -> v + amount) to . Map.adjust (\v -> v - amount) from $ bank
-  
-
 
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
@@ -226,7 +230,7 @@ transfer from to amount bank
 --   swap 2 3 (array (1,4) [(1,"one"),(2,"two"),(3,"three"),(4,"four")])
 --         ==> array (1,4) [(1,"one"),(2,"three"),(3,"two"),(4,"four")]
 
-swap :: Ix i => i -> i -> Array i a -> Array i a
+swap :: (Ix i) => i -> i -> Array i a -> Array i a
 swap i j arr = arr // [(i, arr ! j), (j, arr ! i)]
 
 ------------------------------------------------------------------------------
@@ -240,9 +244,8 @@ swap i j arr = arr // [(i, arr ! j), (j, arr ! i)]
 maxIndex :: (Ix i, Ord a) => Array i a -> i
 maxIndex arr = max' (Data.Array.indices arr)
   where
-    max' (x:xs) = foldr go x xs
-    go a big = case compare (arr ! a) (arr ! big) of EQ -> big
-                                                     LT -> big
-                                                     GT -> a
-
-        
+    max' (x : xs) = foldr go x xs
+    go a big = case compare (arr ! a) (arr ! big) of
+      EQ -> big
+      LT -> big
+      GT -> a
