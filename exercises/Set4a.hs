@@ -38,6 +38,14 @@ allEqual :: (Eq a) => [a] -> Bool
 allEqual [] = True
 allEqual (x : xs) = foldr (\n b -> n == x && b) True xs
 
+{-
+They didn't use foldr, which I used a lot in here. I didn't know they wanted me to use any functions lol (This is a constraints exercise, anyway)
+
+allEqual [] = True
+allEqual (x:xs) = all (==x) xs
+
+-}
+
 ------------------------------------------------------------------------------
 -- Ex 2: implement the function distinct which returns True if all
 -- values in a list are different.
@@ -66,6 +74,9 @@ distinct xs = nub xs == xs
 
 middle :: (Ord a) => a -> a -> a -> a
 middle a b c = (!! 1) . sort $ [a, b, c]
+
+-- I love function composition, but yeah, this wins:
+-- middle x y z = sort [x,y,z] !! 1
 
 ------------------------------------------------------------------------------
 -- Ex 4: return the range of an input list, that is, the difference
@@ -107,6 +118,9 @@ longest = foldr go []
       | length a > length b = a
       | otherwise = if a < b then a else b
 
+-- The non challenge one is interesting (although more intensive)
+-- longest = last . sortBy (comparing length) . reverse . sortBy (comparing head)
+
 ------------------------------------------------------------------------------
 -- Ex 6: Implement the function incrementKey, that takes a list of
 -- (key,value) pairs, and adds 1 to all the values that have the given key.
@@ -143,6 +157,10 @@ incrementKey k xs = map add1 xs
 average :: (Fractional a) => [a] -> a
 average xs = sum xs / (fromIntegral . length $ xs)
 
+-- Again, this is really fun, but you don't need to default to composition
+--
+-- average xs = sum xs / fromIntegral (length xs)
+
 ------------------------------------------------------------------------------
 -- Ex 8: given a map from player name to score and two players, return
 -- the name of the player with more points. If the players are tied,
@@ -166,6 +184,14 @@ winner scores player1 player2 = go (Map.lookup player1 scores) (Map.lookup playe
     go (Just a) Nothing = player2
     go _ _ = player1
 
+-- I didn't read about Map.findWithDefault.
+--
+--winner :: Map.Map String Int -> String -> String -> String
+-- winner scores player1 player2
+  -- | score player2 > score player1 = player2
+  -- | otherwise = player1
+  -- where score p = Map.findWithDefault 0 p scores
+
 ------------------------------------------------------------------------------
 -- Ex 9: compute how many times each value in the list occurs. Return
 -- the frequencies as a Map from value to Int.
@@ -182,6 +208,10 @@ freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
 freqs = foldr go (Map.fromList [])
   where
     go a map = Map.alter (Just . maybe 1 (+ 1)) a map
+
+-- Map.empty is a thing:
+--
+-- freqs = foldr (Map.alter $ Just . maybe 1 (+1)) Map.empty
 
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
@@ -223,6 +253,16 @@ transfer from to amount bank
   where
     applyTransfer = Map.adjust (\v -> v + amount) to . Map.adjust (\v -> v - amount) from $ bank
 
+
+transfer2 :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
+transfer2 from to amount bank =
+  case (Map.lookup from bank, Map.lookup to bank) of
+    (Just fromBalance, Just toBalance) | amount >= 0 && fromBalance >= amount ->
+          Map.adjust (+amount) to (Map.adjust (\x -> x-amount) from bank)
+    _ -> bank
+
+-- Sincerally, both look like the same mess. Although some fun toys: Case can be used on tuples, GUARDS CAN BE USED ON CASE-OFS
+
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
 --
@@ -249,3 +289,9 @@ maxIndex arr = max' (Data.Array.indices arr)
       EQ -> big
       LT -> big
       GT -> a
+
+maxIndex2 :: (Ix i, Ord a) => Array i a -> i
+maxIndex2 arr = index
+  where (index, _) = maximumBy (\(_,x) (_,y) -> compare x y) (assocs arr)
+
+-- This is pretty funny, so smart

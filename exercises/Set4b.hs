@@ -24,6 +24,11 @@ countNothings xs = foldr countHelper 0 xs
 countHelper :: (Num b) => Maybe a -> b -> b
 countHelper item counter = maybe (counter + 1) (const counter) item
 
+-- His was weirder:
+--
+-- countHelper :: Maybe a -> Int -> Int
+-- countHelper Nothing n = n+1
+-- countHelper (Just _) n = n
 ------------------------------------------------------------------------------
 -- Ex 2: myMaximum with a fold. Just like in the previous exercise,
 -- define maxHelper so that the given definition of myMaximum works.
@@ -39,6 +44,8 @@ myMaximum (x : xs) = foldr maxHelper x xs
 maxHelper :: (Ord a) => a -> a -> a
 maxHelper num maxi = max num maxi
 
+-- Just realized... The lsp didn't show the redundancy.
+-- maxHelper = max
 ------------------------------------------------------------------------------
 -- Ex 3: compute the sum and length of a list with a fold. Define
 -- slHelper and slStart so that the given definition of sumAndLength
@@ -58,6 +65,8 @@ slStart = (0.0, 0)
 slHelper :: (Num a, Num b) => a -> (a, b) -> (a, b)
 slHelper value (sum, count) = (sum + value, count + 1)
 
+-- same but with less clear notation. "Big names have to be written out!" and "Let's abbreviate this 5 letter word!"
+
 ------------------------------------------------------------------------------
 -- Ex 4: implement concat with a fold. Define concatHelper and
 -- concatStart so that the given definition of myConcat joins inner
@@ -73,6 +82,9 @@ myConcat xs = foldr concatHelper concatStart xs
 concatStart = []
 
 concatHelper list cur = list ++ cur
+
+-- AGAIN.
+-- concatHelper = (++)
 
 ------------------------------------------------------------------------------
 -- Ex 5: get all occurrences of the largest number in a list with a
@@ -90,6 +102,7 @@ largestHelper num [] = [num]
 largestHelper num (x : xs)
   | num > x = [num]
   | num == x = x : xs ++ [x]
+  -- Here I could have written num == x = num:x:xs or even x:x:xs
   | otherwise = x : xs
 
 ------------------------------------------------------------------------------
@@ -125,3 +138,5 @@ lastHelper :: a -> Maybe a -> Maybe a
 lastHelper item current = case current of
   Nothing -> Just item
   (Just _) -> current
+
+-- his was pretty similar
