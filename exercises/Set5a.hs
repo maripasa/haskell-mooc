@@ -1,7 +1,7 @@
 -- Exercise set 5a
 --
--- * defining algebraic datatypes
--- * recursive datatypes
+-- \* defining algebraic datatypes
+-- \* recursive datatypes
 
 module Set5a where
 
@@ -21,7 +21,7 @@ data Vehicle = Bike | Bus | Tram | Train
 --  - MonthlyTicket "January"
 --  - MonthlyTicket "December"
 
-data BusTicket = MonthlyTicket String | SingleTicket
+data BusTicket = SingleTicket | MonthlyTicket String
 
 ------------------------------------------------------------------------------
 -- Ex 3: Here's the definition for a datatype ShoppingEntry that
@@ -32,7 +32,7 @@ data BusTicket = MonthlyTicket String | SingleTicket
 -- Implement the functions totalPrice and buyOneMore below.
 
 data ShoppingEntry = MkShoppingEntry String Double Int
-  deriving Show
+  deriving (Show)
 
 threeApples :: ShoppingEntry
 threeApples = MkShoppingEntry "Apple" 0.5 3
@@ -68,7 +68,7 @@ buyOneMore (MkShoppingEntry name value count) = MkShoppingEntry name value (coun
 -- setAge and setName (see below).
 
 data Person = Person Int String
-  deriving Show
+  deriving (Show)
 
 -- fred is a person whose name is Fred and age is 90
 fred :: Person
@@ -90,6 +90,8 @@ setName name (Person age _) = Person age name
 setAge :: Int -> Person -> Person
 setAge age (Person _ name) = Person age name
 
+-- They used "Mk+" something in the constructors, I won't comment about that difference in here
+
 ------------------------------------------------------------------------------
 -- Ex 5: define a datatype Position which contains two Int values, x
 -- and y. Also define the functions below for operating on a Position.
@@ -106,26 +108,26 @@ origin = Position 0 0
 
 -- getX returns the x of a Position
 getX :: Position -> Int
-getX (Position x _)= x
+getX (Position x _) = x
 
 -- getY returns the y of a position
 getY :: Position -> Int
-getY (Position _ y)= y
+getY (Position _ y) = y
 
 -- up increases the y value of a position by one
 up :: Position -> Position
-up (Position x y)= Position x (y+1)
+up (Position x y) = Position x (y + 1)
 
 -- right increases the x value of a position by one
 right :: Position -> Position
-right (Position x y) = Position (x+1) y
+right (Position x y) = Position (x + 1) y
 
 ------------------------------------------------------------------------------
 -- Ex 6: Here's a datatype that represents a student. A student can
 -- either be a freshman, a nth year student, or graduated.
 
 data Student = Freshman | NthYear Int | Graduated
-  deriving (Show,Eq)
+  deriving (Show, Eq)
 
 -- Implement the function study, which changes a Freshman into a 1st
 -- year student, a 1st year student into a 2nd year student, and so
@@ -135,7 +137,7 @@ data Student = Freshman | NthYear Int | Graduated
 study :: Student -> Student
 study Graduated = Graduated
 study (NthYear 7) = Graduated
-study (NthYear x) = NthYear (x+1)
+study (NthYear x) = NthYear (x + 1)
 study Freshman = NthYear 1
 
 ------------------------------------------------------------------------------
@@ -163,14 +165,14 @@ zero = Up 0
 
 -- get returns the counter value
 get :: UpDown -> Int
-get (Up x)   = x
+get (Up x) = x
 get (Down x) = x
 
 -- tick increases an increasing counter by one or decreases a
 -- decreasing counter by one
 tick :: UpDown -> UpDown
-tick (Up x) = Up (x+1)
-tick (Down x) = Down (x-1)
+tick (Up x) = Up (x + 1)
+tick (Down x) = Down (x - 1)
 
 -- toggle changes an increasing counter into a decreasing counter and
 -- vice versa
@@ -203,14 +205,27 @@ toggle (Down x) = Up x
 -- rgb (Mix (Invert Red) (Invert Green))  ==> [0.5,0.5,1]
 
 data Color = Red | Green | Blue | Mix Color Color | Invert Color
-  deriving Show
+  deriving (Show)
 
 rgb :: Color -> [Double]
-rgb Red = [1.0,0.0,0.0]
-rgb Green = [0.0,1.0,0.0]
-rgb Blue = [0.0,0.0,1.0]
+rgb Red = [1.0, 0.0, 0.0]
+rgb Green = [0.0, 1.0, 0.0]
+rgb Blue = [0.0, 0.0, 1.0]
 rgb (Mix x y) = zipWith (\x y -> (x + y) / 2) (rgb x) (rgb y)
 rgb (Invert x) = map (1.0 -) (rgb x)
+
+-- I had a misconception that you had to use .0 to turn into double. But it seems it isn't the case. So why do you need the fromIntegral in the ShoppingEntry?
+-- In ghci it turns out ok...
+-- Literals are polymorphic. Explicit integer values are not.
+
+rgb2 :: Color -> [Double]
+rgb2 Red = [1, 0, 0]
+rgb2 Green = [0, 1, 0]
+rgb2 Blue = [0, 0, 1]
+rgb2 (Mix c c') = zipWith avg (rgb2 c) (rgb2 c')
+  where
+    avg x y = (x + y) / 2
+rgb2 (Invert c) = map (1 -) $ rgb2 c
 
 ------------------------------------------------------------------------------
 -- Ex 9: define a parameterized datatype OneOrTwo that contains one or
@@ -242,15 +257,17 @@ data OneOrTwo a = One a | Two a a
 -- KeyVals and lists of pairs.
 
 data KeyVals k v = Pair k v (KeyVals k v) | Empty
-  deriving Show
+  deriving (Show)
 
-toList :: KeyVals k v -> [(k,v)]
+toList :: KeyVals k v -> [(k, v)]
 toList Empty = []
-toList (Pair k v n) = (k,v) : toList n
+toList (Pair k v n) = (k, v) : toList n
 
-fromList :: [(k,v)] -> KeyVals k v
+fromList :: [(k, v)] -> KeyVals k v
 fromList [] = Empty
-fromList (x:xs) = Pair (fst x) (snd x) (fromList xs)
+fromList (x : xs) = Pair (fst x) (snd x) (fromList xs)
+
+-- Two quick things, "rest" would be prettier and you could pattern match ((k,v):kvs)
 
 ------------------------------------------------------------------------------
 -- Ex 11: The data type Nat is the so called Peano
@@ -264,7 +281,7 @@ fromList (x:xs) = Pair (fst x) (snd x) (fromList xs)
 --
 
 data Nat = Zero | PlusOne Nat
-  deriving (Show,Eq)
+  deriving (Show, Eq)
 
 fromNat :: Nat -> Int
 fromNat Zero = 0
@@ -274,7 +291,17 @@ toNat :: Int -> Maybe Nat
 toNat 0 = Just Zero
 toNat z
   | z < 0 = Nothing
-  | otherwise = Just . PlusOne . maybe Zero id . toNat $ z-1
+  | otherwise = Just . PlusOne . maybe Zero id . toNat $ z - 1
+
+-- I didn't like my answer, but I also didn't want a helper, but this is prettier:
+--
+toNat2 :: Int -> Maybe Nat
+toNat2 z
+  | z < 0 = Nothing
+  | otherwise = Just (go z)
+  where
+    go 0 = Zero
+    go n = PlusOne (go (n - 1))
 
 ------------------------------------------------------------------------------
 -- Ex 12: While pleasingly simple in its definition, the Nat datatype is not
@@ -329,7 +356,7 @@ data Bin = End | O Bin | I Bin
 
 -- This function increments a binary number by one.
 inc :: Bin -> Bin
-inc End   = I End
+inc End = I End
 inc (O b) = I b
 inc (I b) = O (inc b)
 
@@ -340,17 +367,43 @@ prettyPrint b = reverse $ unfl b
     unfl (O b) = "0" ++ unfl b
     unfl (I b) = "1" ++ unfl b
 
+hprettyPrint :: Bin -> String
+hprettyPrint b = prettyPrint' b ""
+  where
+    prettyPrint' End s = s
+    prettyPrint' (O b) s = prettyPrint' b ('0' : s)
+    prettyPrint' (I b) s = prettyPrint' b ('1' : s)
+
 fromBin :: Bin -> Int
 fromBin = go 0
   where
     go c End = 0
-    go c (I n) = 2^c + go (c+1) n
-    go c (O n) = go (c+1) n
+    go c (I n) = 2 ^ c + go (c + 1) n
+    go c (O n) = go (c + 1) n
 
+fromBin2 :: Bin -> Int
+fromBin2 End = 0
+fromBin2 (O b) = 2 * fromBin2 b
+fromBin2 (I b) = 2 * fromBin2 b + 1
+
+-- I didn't know I could do that... But deriving from to Bin... Yeah, I could do that.
 
 toBin :: Int -> Bin
 toBin 0 = O End
 toBin 1 = I End
 toBin x
   | x `mod` 2 == 1 = I (toBin (x `div` 2))
-  | otherwise      = O (toBin (x `div` 2))
+  | otherwise = O (toBin (x `div` 2))
+
+-- An utility function for extracting the bits from an Int:
+-- bits :: Int -> [Int]
+-- bits 0 = [0]
+-- bits 1 = [1]
+-- bits n = n `mod` 2 : bits (n `div` 2)
+--
+-- toBin :: Int -> Bin
+-- toBin n = foldr helper End (bits n)
+--   where helper 0 = O
+--         helper _ = I
+--
+-- This is fun
