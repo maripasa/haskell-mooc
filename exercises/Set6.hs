@@ -2,15 +2,15 @@
 
 module Set6 where
 
-import Mooc.Todo
 import Data.Char (toLower)
+import Mooc.Todo
 
 ------------------------------------------------------------------------------
 -- Ex 1: define an Eq instance for the type Country below. You'll need
 -- to use pattern matching.
 
 data Country = Finland | Switzerland | Norway
-  deriving Show
+  deriving (Show)
 
 instance Eq Country where
   Finland == Finland = True
@@ -43,11 +43,10 @@ instance Ord Country where
 --   Name "Pekka!" == Name "pekka"  ==> False
 
 data Name = Name String
-  deriving Show
+  deriving (Show)
 
 instance Eq Name where
   Name a == Name b = map toLower a == map toLower b
-
 
 ------------------------------------------------------------------------------
 -- Ex 4: here is a list type parameterized over the type it contains.
@@ -58,9 +57,9 @@ instance Eq Name where
 -- remove it?
 
 data List a = Empty | LNode a (List a)
-  deriving Show
+  deriving (Show)
 
-instance Eq a => Eq (List a) where
+instance (Eq a) => Eq (List a) where
   Empty == Empty = True
   LNode a n == LNode a' n' = a == a' && n == n'
   _ == _ = False
@@ -71,17 +70,22 @@ instance Eq a => Eq (List a) where
 -- should return the price of an item.
 --
 -- The prices should be as follows:
+
 -- * chicken eggs cost 20
+
 -- * chocolate eggs cost 30
+
 -- * milk costs 15 per liter
+
 --
 -- Example:
 --   price ChickenEgg  ==>  20
 
 data Egg = ChickenEgg | ChocolateEgg
-  deriving Show
+  deriving (Show)
+
 data Milk = Milk Int -- amount in litres
-  deriving Show
+  deriving (Show)
 
 class Price a where
   price :: a -> Int
@@ -102,11 +106,11 @@ instance Price Milk where
 -- price [Just ChocolateEgg, Nothing, Just ChickenEgg]  ==> 50
 -- price [Nothing, Nothing, Just (Milk 1), Just (Milk 2)]  ==> 45
 
-instance Price a => Price (Maybe a) where
+instance (Price a) => Price (Maybe a) where
   price Nothing = 0
   price (Just a) = price a
 
-instance Price a => Price [a] where
+instance (Price a) => Price [a] where
   price = foldr ((+) . price) 0
 
 ------------------------------------------------------------------------------
@@ -117,13 +121,12 @@ instance Price a => Price [a] where
 -- and Infinite is greater than any other value.
 
 data Number = Finite Integer | Infinite
-  deriving (Show,Eq)
+  deriving (Show, Eq)
 
 instance Ord Number where
   Finite a <= Finite b = a <= b
   _ <= Infinite = True
   _ <= _ = False
-
 
 ------------------------------------------------------------------------------
 -- Ex 8: rational numbers have a numerator and a denominator that are
@@ -146,11 +149,10 @@ instance Ord Number where
 --   RationalNumber 13 15 == RationalNumber 4 5  ==> False
 
 data RationalNumber = RationalNumber Integer Integer
-  deriving Show
+  deriving (Show)
 
 instance Eq RationalNumber where
   RationalNumber a b == RationalNumber c d = a * d == b * c
-  
 
 ------------------------------------------------------------------------------
 -- Ex 9: implement the function simplify, which simplifies a rational
@@ -171,7 +173,8 @@ instance Eq RationalNumber where
 
 simplify :: RationalNumber -> RationalNumber
 simplify (RationalNumber a b) = RationalNumber (a `div` g) (b `div` g)
-  where g = gcd a b
+  where
+    g = gcd a b
 
 ------------------------------------------------------------------------------
 -- Ex 10: implement the typeclass Num for RationalNumber. The results
@@ -192,8 +195,8 @@ simplify (RationalNumber a b) = RationalNumber (a `div` g) (b `div` g)
 --   signum (RationalNumber 0 2)             ==> RationalNumber 0 1
 
 instance Num RationalNumber where
-  RationalNumber a b + RationalNumber a' b' = simplify (RationalNumber (a*b' + a'*b) (b*b'))
-  RationalNumber a b * RationalNumber a' b' = simplify (RationalNumber (a*a') (b*b'))
+  RationalNumber a b + RationalNumber a' b' = simplify (RationalNumber (a * b' + a' * b) (b * b'))
+  RationalNumber a b * RationalNumber a' b' = simplify (RationalNumber (a * a') (b * b'))
   abs (RationalNumber a b) = RationalNumber (abs a) b
   signum (RationalNumber a b)
     | a == 0 = RationalNumber 0 1
@@ -221,7 +224,7 @@ class Addable a where
 
 instance Addable [a] where
   zero = []
-  add a b = a ++ b 
+  add a b = a ++ b
 
 instance Addable Integer where
   zero = 0
@@ -254,6 +257,7 @@ instance Addable Integer where
 
 data Color = Red | Green | Blue
   deriving (Show, Eq)
+
 data Suit = Club | Spade | Diamond | Heart
   deriving (Show, Eq)
 
@@ -261,7 +265,7 @@ class Cycle a where
   step :: a -> a
   stepMany :: Int -> a -> a
   stepMany 0 = id
-  stepMany n = stepMany (n-1) . step
+  stepMany n = stepMany (n - 1) . step
 
 instance Cycle Color where
   step Red = Green
@@ -273,6 +277,3 @@ instance Cycle Suit where
   step Spade = Diamond
   step Diamond = Heart
   step Heart = Club
-
-  
-
