@@ -32,6 +32,14 @@ instance Ord Country where
     | a == b = EQ
     | otherwise = GT
 
+{-
+instance Ord Country where
+  Finland <= Norway       = True
+  Finland <= Switzerland  = True
+  Norway <= Switzerland   = True
+  x <= y                  = x == y
+-}
+
 ------------------------------------------------------------------------------
 -- Ex 3: Implement an Eq instance for the type Name which contains a String.
 -- The Eq instance should ignore capitalization.
@@ -112,6 +120,8 @@ instance (Price a) => Price (Maybe a) where
 
 instance (Price a) => Price [a] where
   price = foldr ((+) . price) 0
+
+-- I could have used sum (map), foldr isn't the cleanest always.
 
 ------------------------------------------------------------------------------
 -- Ex 7: below you'll find the datatype Number, which is either an
@@ -198,10 +208,20 @@ instance Num RationalNumber where
   RationalNumber a b + RationalNumber a' b' = simplify (RationalNumber (a * b' + a' * b) (b * b'))
   RationalNumber a b * RationalNumber a' b' = simplify (RationalNumber (a * a') (b * b'))
   abs (RationalNumber a b) = RationalNumber (abs a) b
+
+  -- They made it a bit bigger, but they did something funny
+  --abs p@(RationalNumber a b)
+   -- | a * b < 0 = RationalNumber (-a) b
+    -- otherwise = p
+
+    -- p@ is pattern binding. You can use the pattern and desconstruct it at the same time
   signum (RationalNumber a b)
     | a == 0 = RationalNumber 0 1
     | a < 0 = RationalNumber (-1) 1
     | otherwise = RationalNumber 1 1
+
+  -- They used a * b for the signs, but.. yeah
+
   fromInteger x = RationalNumber x 1
   negate (RationalNumber a b) = RationalNumber (-a) b
 
@@ -226,9 +246,13 @@ instance Addable [a] where
   zero = []
   add a b = a ++ b
 
+  -- add = (++)
+
 instance Addable Integer where
   zero = 0
   add a b = a + b
+
+  -- add = (+)
 
 ------------------------------------------------------------------------------
 -- Ex 12: cycling. Implement a type class Cycle that contains a
