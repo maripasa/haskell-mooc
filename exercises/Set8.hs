@@ -179,6 +179,7 @@ dotAndLine = Picture f
 blendColor :: Color -> Color -> Color
 blendColor (Color r1 g1 b1) (Color r2 g2 b2) = Color (mean r1 r2) (mean g1 g2) (mean b1 b2)
 
+
 mean :: Int -> Int -> Int
 mean x y = div (x + y) 2
 
@@ -283,10 +284,14 @@ rectangle x0 y0 w h = Shape s
 -- shape.
 
 union :: Shape -> Shape -> Shape
-union = todo
+union (Shape s1) (Shape s2) = Shape sr
+  where
+    sr c = s1 c || s2 c
 
 cut :: Shape -> Shape -> Shape
-cut = todo
+cut (Shape s1) (Shape s2) = Shape sr
+  where
+    sr c = if s2 c then False else s1 c
 
 ------------------------------------------------------------------------------
 
@@ -316,7 +321,9 @@ exampleSnowman = fill white snowman
 --        ["000000","000000","000000"]]
 
 paintSolid :: Color -> Shape -> Picture -> Picture
-paintSolid color shape base = todo
+paintSolid color (Shape s) (Picture f) = Picture r
+  where
+    r c = if s c then color else f c
 
 ------------------------------------------------------------------------------
 
@@ -367,7 +374,9 @@ stripes a b = Picture f
 --       ["000000","000000","000000","000000","000000"]]
 
 paint :: Picture -> Shape -> Picture -> Picture
-paint pat shape base = todo
+paint (Picture p) (Shape s) (Picture f) = Picture r
+  where
+    r c = if s c then p c else f c
 
 ------------------------------------------------------------------------------
 
@@ -390,6 +399,16 @@ flipCoordXY (Coord x y) = Coord y x
 -- Flip a picture by switching x and y coordinates
 flipXY :: Picture -> Picture
 flipXY (Picture f) = Picture (f . flipCoordXY)
+
+flipX :: Picture -> Picture
+flipX (Picture f) = Picture (f . flipX')
+  where
+    flipX' (Coord x y) = Coord (-x) y
+
+flipY :: Picture -> Picture
+flipY (Picture f) = Picture (f . flipY')
+  where
+    flipY' (Coord x y) = Coord x (-y)
 
 zoomCoord :: Int -> Coord -> Coord
 zoomCoord z (Coord x y) = Coord (div x z) (div y z)
@@ -433,19 +452,21 @@ xy = Picture f
 data Fill = Fill Color
 
 instance Transform Fill where
-  apply = todo
+  apply (Fill c) = const (solid c)
 
 data Zoom = Zoom Int
   deriving (Show)
 
 instance Transform Zoom where
-  apply = todo
+  apply (Zoom z) = zoom z
 
 data Flip = FlipX | FlipY | FlipXY
   deriving (Show)
 
 instance Transform Flip where
-  apply = todo
+  apply FlipX = flipX
+  apply FlipY = flipY
+  apply FlipXY = flipXY
 
 ------------------------------------------------------------------------------
 
@@ -461,8 +482,8 @@ instance Transform Flip where
 data Chain a b = Chain a b
   deriving (Show)
 
-instance Transform (Chain a b) where
-  apply = todo
+instance (Transform a, Transform b) => Transform (Chain a b) where
+  apply (Chain a b) = apply a . apply b
 
 ------------------------------------------------------------------------------
 
@@ -500,8 +521,17 @@ checkered = flipBlend largeVerticalStripes2
 data Blur = Blur
   deriving (Show)
 
+avg :: [Color] -> Color
+avg colors@(c:cs) = divc (foldr addc c cs) (length colors)
+  where
+    addc (Color r g b) (Color r' g' b') = Color (r + r') (g + g') (b + b')
+    divc (Color r g b) x = Color (div r x) (div g x) (div b x)
+
 instance Transform Blur where
-  apply = todo
+  apply _ (Picture f) = Picture blur
+    where
+      blur (Coord x y) = avg [p x y, p (x + 1) y, p (x - 1) y, p x (y + 1), p x (y - 1)]
+      p x y = f (Coord x y)
 
 ------------------------------------------------------------------------------
 
@@ -520,7 +550,8 @@ data BlurMany = BlurMany Int
   deriving (Show)
 
 instance Transform BlurMany where
-  apply = todo
+  apply (BlurMany 1) = apply Blur
+  apply (BlurMany n) = apply Blur . apply (BlurMany (n-1))
 
 ------------------------------------------------------------------------------
 
