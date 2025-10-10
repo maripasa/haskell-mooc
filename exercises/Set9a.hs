@@ -26,7 +26,10 @@ import Mooc.Todo
 -- Otherwise return "Ok."
 
 workload :: Int -> Int -> String
-workload nExercises hoursPerExercise = todo
+workload n h
+  | n*h > 100 = "Holy moly!"
+  | n*h < 10  = "Piece of cake!"
+  | otherwise = "Ok."
 
 ------------------------------------------------------------------------------
 -- Ex 2: Implement the function echo that builds a string like this:
@@ -39,7 +42,8 @@ workload nExercises hoursPerExercise = todo
 -- Hint: use recursion
 
 echo :: String -> String
-echo = todo
+echo "" = ""
+echo (c:cs) = (c:cs) ++ ", " ++ echo cs
 
 ------------------------------------------------------------------------------
 -- Ex 3: A country issues some banknotes. The banknotes have a serial
@@ -52,7 +56,7 @@ echo = todo
 -- are valid.
 
 countValid :: [String] -> Int
-countValid = todo
+countValid = length . filter (\(_:_:third:fourth:fifth:sixth:_) -> third == fifth || fourth == sixth)
 
 ------------------------------------------------------------------------------
 -- Ex 4: Find the first element that repeats two or more times _in a
@@ -64,7 +68,10 @@ countValid = todo
 --   repeated [1,2,1,2,3,3] ==> Just 3
 
 repeated :: Eq a => [a] -> Maybe a
-repeated = todo
+repeated (x:y:xs)
+  | x == y = Just x
+  | otherwise = repeated (y:xs)
+repeated _ = Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 5: A laboratory has been collecting measurements. Some of the
@@ -86,7 +93,11 @@ repeated = todo
 --     ==> Left "no data"
 
 sumSuccess :: [Either String Int] -> Either String Int
-sumSuccess = todo
+sumSuccess stats
+  | rights == [] = Left "no data"
+  | otherwise    = Right (sum rights)
+  where
+    rights = [ y | Right y <- stats ]
 
 ------------------------------------------------------------------------------
 -- Ex 6: A combination lock can either be open or closed. The lock
@@ -108,30 +119,34 @@ sumSuccess = todo
 --   isOpen (open "0000" (lock (changeCode "0000" (open "1234" aLock)))) ==> True
 --   isOpen (open "1234" (lock (changeCode "0000" (open "1234" aLock)))) ==> False
 
-data Lock = LockUndefined
+data Lock = Lock String Bool
   deriving Show
 
 -- aLock should be a locked lock with the code "1234"
 aLock :: Lock
-aLock = todo
+aLock = Lock "1234" False
 
 -- isOpen returns True if the lock is open
 isOpen :: Lock -> Bool
-isOpen = todo
+isOpen (Lock _ f) = f
 
 -- open tries to open the lock with the given code. If the code is
 -- wrong, nothing happens.
 open :: String -> Lock -> Lock
-open = todo
+open typed (Lock code False)
+  | code == typed = Lock code True
+  | otherwise = Lock code False
+open _ l = l
 
 -- lock closes a lock. If the lock is already closed, nothing happens.
 lock :: Lock -> Lock
-lock = todo
+lock (Lock code _) = Lock code False
 
 -- changeCode changes the code of an open lock. If the lock is closed,
 -- nothing happens.
 changeCode :: String -> Lock -> Lock
-changeCode = todo
+changeCode new (Lock code True) = Lock new True
+changeCode _ l = l
 
 ------------------------------------------------------------------------------
 -- Ex 7: Here's a type Text that just wraps a String. Implement an Eq
@@ -149,6 +164,13 @@ changeCode = todo
 data Text = Text String
   deriving Show
 
+removeWhiteSpace [] = []
+removeWhiteSpace (x:xs)
+  | x `elem` " \n" = removeWhiteSpace xs
+  | otherwise      = x : removeWhiteSpace xs
+
+instance Eq Text where
+  Text a == Text b = removeWhiteSpace a == removeWhiteSpace b
 
 ------------------------------------------------------------------------------
 -- Ex 8: We can represent functions or mappings as lists of pairs.
@@ -182,7 +204,7 @@ data Text = Text String
 --       ==> [("a",1),("b",2)]
 
 compose :: (Eq a, Eq b) => [(a,b)] -> [(b,c)] -> [(a,c)]
-compose = todo
+compose f g = [(a,c) | (a,b) <- f, Just c <- [lookup b g]]
 
 ------------------------------------------------------------------------------
 -- Ex 9: Reorder a list using a list of indices.
@@ -226,4 +248,4 @@ multiply :: Permutation -> Permutation -> Permutation
 multiply p q = map (\i -> p !! (q !! i)) (identity (length p))
 
 permute :: Permutation -> [a] -> [a]
-permute = todo
+permute perm = map snd . sortBy (comparing fst) . zip perm
