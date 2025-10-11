@@ -199,6 +199,8 @@ danger :: Candidate -> Stack -> Bool
 danger s [] = False
 danger s (q : qs) = sameCol s q || sameRow s q || sameDiag s q || sameAntidiag s q || danger s qs
 
+-- [r s q | r <- [sameCol, sameRow, sameDiag, sameAntidiag], q <- qs]
+
 --------------------------------------------------------------------------------
 -- Ex 5: In this exercise, the task is to write a modified version of
 -- prettyPrint that marks those empty squares with '#' that are in the
@@ -284,10 +286,10 @@ prettyPrint2 n queens = help 1 1 (prettyPrint n queens)
 --     Q#######
 
 fixFirst :: Size -> Stack -> Maybe Stack
-fixFirst n (q@(_,y) : qs)
+fixFirst n (q@(_, y) : qs)
   | y > n = Nothing
   | danger q qs = fixFirst n (nextCol q : qs)
-  | otherwise = Just (q:qs)
+  | otherwise = Just (q : qs)
 
 --------------------------------------------------------------------------------
 -- Ex 7: We need two helper functions for stack management.
@@ -311,10 +313,10 @@ fixFirst n (q@(_,y) : qs)
 -- Hint: Remember nextRow and nextCol? Use them!
 
 continue :: Stack -> Stack
-continue (s:ss) = nextRow s : s : ss
+continue (s : ss) = nextRow s : s : ss
 
 backtrack :: Stack -> Stack
-backtrack (_:s:ss) = nextCol s : ss
+backtrack (_ : s : ss) = nextCol s : ss
 
 --------------------------------------------------------------------------------
 -- Ex 8: Let's take a step. Our algorithm solves the problem (in a
@@ -384,7 +386,7 @@ backtrack (_:s:ss) = nextCol s : ss
 
 step :: Size -> Stack -> Stack
 step n queens = case fixFirst n queens of
-  Just a  -> continue a
+  Just a -> continue a
   Nothing -> backtrack queens
 
 --------------------------------------------------------------------------------
@@ -402,8 +404,11 @@ step n queens = case fixFirst n queens of
 finish :: Size -> Stack -> Stack
 finish n queens
   | length sol == n + 1 = tail sol
-  | otherwise           = finish n sol
-  where sol = step n queens
+  | otherwise = finish n sol
+  where
+    sol = step n queens
+
+-- just send sol through finish n sol and check queens
 
 solve :: Size -> Stack
 solve n = finish n [(1, 1)]
