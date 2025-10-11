@@ -99,6 +99,8 @@ sumSuccess stats
   where
     rights = [ y | Right y <- stats ]
 
+-- could have fallen back to pattern matching
+
 ------------------------------------------------------------------------------
 -- Ex 6: A combination lock can either be open or closed. The lock
 -- also remembers a code. A closed lock can only be opened with the
@@ -148,6 +150,8 @@ changeCode :: String -> Lock -> Lock
 changeCode new (Lock code True) = Lock new True
 changeCode _ l = l
 
+-- they made Locked ... | Open ..., which is more readable
+
 ------------------------------------------------------------------------------
 -- Ex 7: Here's a type Text that just wraps a String. Implement an Eq
 -- instance for Text that ignores all white space (space characters
@@ -171,6 +175,8 @@ removeWhiteSpace (x:xs)
 
 instance Eq Text where
   Text a == Text b = removeWhiteSpace a == removeWhiteSpace b
+
+-- didn't read isSpace and could have just filtered
 
 ------------------------------------------------------------------------------
 -- Ex 8: We can represent functions or mappings as lists of pairs.
