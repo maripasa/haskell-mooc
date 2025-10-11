@@ -401,7 +401,7 @@ step n queens = case fixFirst n queens of
 
 finish :: Size -> Stack -> Stack
 finish n queens
-  | length sol == n + 1 = queens
+  | length sol == n + 1 = tail sol
   | otherwise           = finish n sol
   where sol = step n queens
 
