@@ -179,7 +179,6 @@ dotAndLine = Picture f
 blendColor :: Color -> Color -> Color
 blendColor (Color r1 g1 b1) (Color r2 g2 b2) = Color (mean r1 r2) (mean g1 g2) (mean b1 b2)
 
-
 mean :: Int -> Int -> Int
 mean x y = div (x + y) 2
 
@@ -269,6 +268,12 @@ rectangle x0 y0 w h = Shape s
     x1 = x0 + w
     y1 = y0 + h
 
+-- I could have done just
+-- f = and [x>=x0, x<x1, y>=y0, y<y1]
+-- which is cool
+-- or also exists
+
+
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
@@ -292,6 +297,8 @@ cut :: Shape -> Shape -> Shape
 cut (Shape s1) (Shape s2) = Shape sr
   where
     sr c = if s2 c then False else s1 c
+
+-- s1 coord && not (s2 coord)
 
 ------------------------------------------------------------------------------
 
@@ -522,7 +529,7 @@ data Blur = Blur
   deriving (Show)
 
 avg :: [Color] -> Color
-avg colors@(c:cs) = divc (foldr addc c cs) (length colors)
+avg colors@(c : cs) = divc (foldr addc c cs) (length colors)
   where
     addc (Color r g b) (Color r' g' b') = Color (r + r') (g + g') (b + b')
     divc (Color r g b) x = Color (div r x) (div g x) (div b x)
@@ -551,7 +558,7 @@ data BlurMany = BlurMany Int
 
 instance Transform BlurMany where
   apply (BlurMany 1) = apply Blur
-  apply (BlurMany n) = apply Blur . apply (BlurMany (n-1))
+  apply (BlurMany n) = apply Blur . apply (BlurMany (n - 1))
 
 ------------------------------------------------------------------------------
 
