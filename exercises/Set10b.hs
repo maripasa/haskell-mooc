@@ -3,13 +3,12 @@
 --
 -- In particular, seq is not available, so you must use pattern
 -- matching to force evaluation!
-
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Set10b where
 
-import Mooc.VeryLimitedPrelude
 import Mooc.Todo
+import Mooc.VeryLimitedPrelude
 
 ------------------------------------------------------------------------------
 -- Ex 1: Define the operator ||| that works like ||, but forces its
@@ -38,8 +37,8 @@ x ||| _ = x
 
 boolLength :: [Bool] -> Int
 boolLength [] = 0
-boolLength (False:xs) = 1 + boolLength xs
-boolLength (True:xs) = 1 + boolLength xs
+boolLength (False : xs) = 1 + boolLength xs
+boolLength (True : xs) = 1 + boolLength xs
 
 ------------------------------------------------------------------------------
 -- Ex 3: Define the function validate which, given a predicate and a
@@ -98,4 +97,4 @@ instance MySeq Int where
 
 instance MySeq [a] where
   myseq [] b = b
-  myseq (x:xs) b = b
+  myseq (x : xs) b = b
