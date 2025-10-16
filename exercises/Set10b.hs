@@ -56,6 +56,8 @@ validate predicate value
   | predicate value = value
   | otherwise = value
 
+-- case of vs guards. Is there any difference when matching bools? Minimal performance-wise.
+
 ------------------------------------------------------------------------------
 -- Ex 4: Even though we can't implement the generic seq function
 -- ourselves, we can implement it manually for specific datatypes.
@@ -98,3 +100,8 @@ instance MySeq Int where
 instance MySeq [a] where
   myseq [] b = b
   myseq (x : xs) b = b
+
+{-
+myseq [] b = b
+myseq _ b = b
+ -}

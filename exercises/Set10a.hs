@@ -41,6 +41,12 @@ interleave [] bs = bs
 interleave as [] = as
 interleave (a : as) (b : bs) = a : b : interleave as bs
 
+--             D:
+
+interleave2 :: [a] -> [a] -> [a]
+interleave2 (x : xs) ys = x : interleave2 ys xs
+interleave2 [] ys = ys
+
 ------------------------------------------------------------------------------
 -- Ex 3: Deal out cards. Given a list of players (strings), and a list
 -- of cards (strings), deal out the cards to the players in a cycle.
@@ -60,7 +66,6 @@ interleave (a : as) (b : bs) = a : b : interleave as bs
 deal :: [String] -> [String] -> [(String, String)]
 deal people items = zip items (cycle people)
 
-
 ------------------------------------------------------------------------------
 -- Ex 4: Compute a running average. Go through a list of Doubles and
 -- output a list of averages: the average of the first number, the
@@ -79,6 +84,10 @@ averages nums = avg 1 0 nums
   where
     avg _ _ [] = []
     avg idx pastSum (x : xs) = (x + pastSum) / idx : avg (idx + 1) (x + pastSum) xs
+
+-- I could have passed and done
+-- go x 1 xs
+-- go sum count (x:xs) = sum / count : go (sum+x) (count+1)
 
 ------------------------------------------------------------------------------
 -- Ex 5: Given two lists, xs and ys, and an element z, generate an
@@ -112,6 +121,10 @@ lengthAtLeast 0 _ = True
 lengthAtLeast _ [] = False
 lengthAtLeast len (x : xs) = lengthAtLeast (len - 1) xs
 
+--                    D:
+--
+lengthAtLeast' n xs = length (take n xs) == n
+
 ------------------------------------------------------------------------------
 -- Ex 7: The function chunks should take in a list, and a number n,
 -- and return all sublists of length n of the original list. The
@@ -129,10 +142,11 @@ lengthAtLeast len (x : xs) = lengthAtLeast (len - 1) xs
 
 chunks :: Int -> [a] -> [[a]]
 chunks s [] = []
-chunks s l@(x:xs)
+chunks s l@(x : xs)
   | lengthAtLeast s l = take s l : chunks s xs
-  | otherwise         = []
+  | otherwise = []
 
+-- Could have kept tail and wouldn't have to use l
 
 ------------------------------------------------------------------------------
 -- Ex 8: Define a newtype called IgnoreCase, that wraps a value of
