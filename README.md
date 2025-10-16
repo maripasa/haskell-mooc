@@ -19,4 +19,4 @@ material and exercises are openly available.
 The course is intended to be followed through the [Course
 page](https://haskell.mooc.fi), using the [Original Github Repository](https://github.com/moocfi/haskell-mooc).
 
-I'm not an owner or mantainer of the Haskell MOOC course. This is a fork made with the intent of storing notes and solutions from the course activities.
+This is a fork made with the intent of storing notes and solutions from the course activities.
