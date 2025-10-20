@@ -2,9 +2,8 @@ module Set11a where
 
 import Control.Monad
 import Data.List
-import System.IO
-
 import Mooc.Todo
+import System.IO
 
 -- Lecture 11:
 --   * The IO type
@@ -38,6 +37,8 @@ greet name = do
   putStr "HELLO "
   putStrLn name
 
+-- putStrLn $ "HELLO" ++ name
+
 ------------------------------------------------------------------------------
 -- Ex 3: define the IO operation greet2 that reads a name from the
 -- keyboard and then greets that name like the in the previous
@@ -66,8 +67,6 @@ readWords n = do
   x <- replicateM n getLine
   return (sort x)
 
-
-
 ------------------------------------------------------------------------------
 -- Ex 5: define the IO operation readUntil f, which reads lines from
 -- the user and returns them as a list. Reading is stopped when f
@@ -91,6 +90,8 @@ readUntil f = do
       rest <- readUntil f
       return (x : rest)
 
+-- I had some problems with return and parenthesis for some reason, the model answers use return $ evaluation a lot
+
 ------------------------------------------------------------------------------
 -- Ex 6: given n, print the numbers from n to 0, one per line
 
@@ -98,7 +99,9 @@ countdownPrint :: Int -> IO ()
 countdownPrint 0 = print 0
 countdownPrint n = do
   print n
-  countdownPrint (n-1)
+  countdownPrint (n - 1)
+
+-- countDownPrint = MapM_ print [n, n-1 .. 0]
 
 ------------------------------------------------------------------------------
 -- Ex 7: isums n should read n numbers from the user (one per line) and
@@ -118,9 +121,8 @@ isums n = isums' n 0
     isums' 0 sum = return sum
     isums' n sum = do
       x <- readLn
-      print (x+sum)
-      isums' (n-1) (x+sum)
-  
+      print (x + sum)
+      isums' (n - 1) (x + sum)
 
 ------------------------------------------------------------------------------
 -- Ex 8: when is a useful function, but its first argument has type
@@ -133,6 +135,10 @@ whenM cond op = do
   if cond'
     then op
     else return ()
+
+-- whenM cond op = do
+--  cond' <- cond
+--  when cond' op
 
 ------------------------------------------------------------------------------
 -- Ex 9: implement the while loop. while condition operation should
@@ -147,9 +153,10 @@ whenM cond op = do
 
 -- used in an example
 ask :: IO Bool
-ask = do putStrLn "Y/N?"
-         line <- getLine
-         return $ line == "Y"
+ask = do
+  putStrLn "Y/N?"
+  line <- getLine
+  return $ line == "Y"
 
 while :: IO Bool -> IO () -> IO ()
 while cond op = do
@@ -159,6 +166,15 @@ while cond op = do
       op
       while cond op
     else return ()
+
+-- again
+-- while cond op = do
+--  cond' <- cond
+--   when cond' iter
+--  where
+--    iter = do
+--      op
+--      while cond op
 
 ------------------------------------------------------------------------------
 -- Ex 10: given a string and an IO operation, print the string, run

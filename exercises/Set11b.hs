@@ -1,12 +1,10 @@
 module Set11b where
 
 import Control.Monad
-import Data.List
 import Data.IORef
-import System.IO
-
+import Data.List
 import Mooc.Todo
-
+import System.IO
 
 ------------------------------------------------------------------------------
 -- Ex 1: Given an IORef String and a list of Strings, update the value
@@ -21,9 +19,12 @@ import Mooc.Todo
 
 appendAll :: IORef String -> [String] -> IO ()
 appendAll s [] = return ()
-appendAll s (x:xs) = do
-  modifyIORef s (++x)
+appendAll s (x : xs) = do
+  modifyIORef s (++ x)
   appendAll s xs
+
+-- appendAll s xs = forM_ xs $ \str -> do
+--  modifyIORef s (++str)
 
 ------------------------------------------------------------------------------
 -- Ex 2: Given two IORefs, swap the values stored in them.
@@ -43,7 +44,8 @@ swapIORefs a b = do
   bv <- readIORef b
   writeIORef a bv
   writeIORef b temp
-  return ()
+
+-- return () no need for that, could have written the function prettier too
 
 ------------------------------------------------------------------------------
 -- Ex 3: sometimes one bumps into IO operations that return IO
@@ -92,20 +94,29 @@ doubleCall op = do
 compose :: (a -> IO b) -> (c -> IO a) -> c -> IO b
 compose op1 op2 c = do
   val1 <- op2 c
-  val2 <- op1 val1
-  return val2
+  op1 val1
+
+-- val2 <- op1 val1
+-- return val2
+-- second time I boxed a value I just unboxed.
 
 ------------------------------------------------------------------------------
 -- Ex 5: Reading lines from a file. The module System.IO defines
 -- operations for Handles, which represent open files that can be read
 -- from or written to. Here are some functions that might be useful:
 --
+
 -- * hGetLine :: Handle -> IO String
+
 --   Reads one line from the Handle. Will fail if the Handle is at the
 --   end of the file
+
 -- * hIsEOF :: Handle -> IO Bool
+
 --   Produces True if the Handle is at the end of the file.
+
 -- * hGetContents :: Handle -> IO String
+
 --   Reads content from Handle until the end of the file.
 --
 -- Implement the function hFetchLines which returns the contents of
@@ -132,6 +143,8 @@ hFetchLines f = do
       rest <- hFetchLines f
       return (line : rest)
 
+-- or
+-- lines (contents) could also work, next time I should check how HGetContent treats line breaks
 
 ------------------------------------------------------------------------------
 -- Ex 6: Given a Handle and a list of line indexes, produce the lines
@@ -147,11 +160,13 @@ hSelectLines :: Handle -> [Int] -> IO [String]
 hSelectLines h nums = do
   l <- hFetchLines h
   return (takeIndex l 1 nums)
-  where 
-    takeIndex (l:ls) i (n:nums)
-      | i /= n    = takeIndex ls (i+1) (n:nums)
-      | otherwise = l : takeIndex ls (i+1) nums
+  where
+    takeIndex (l : ls) i (n : nums)
+      | i /= n = takeIndex ls (i + 1) (n : nums)
+      | otherwise = l : takeIndex ls (i + 1) nums
     takeIndex _ _ _ = []
+
+-- I should not forget !!, although mine is affine, and with !! is prob quadratic or smth
 
 ------------------------------------------------------------------------------
 -- Ex 7: In this exercise we see how a program can be split into a
@@ -186,12 +201,12 @@ hSelectLines h nums = do
 --   *Set11b>
 
 -- This is used in the example above. Don't change it!
-counter :: (String,Integer) -> (Bool,String,Integer)
-counter ("inc",n)   = (True,"done",n+1)
-counter ("print",n) = (True,show n,n)
-counter ("quit",n)  = (False,"bye bye",n)
+counter :: (String, Integer) -> (Bool, String, Integer)
+counter ("inc", n) = (True, "done", n + 1)
+counter ("print", n) = (True, show n, n)
+counter ("quit", n) = (False, "bye bye", n)
 
-interact' :: ((String,st) -> (Bool,String,st)) -> st -> IO st
+interact' :: ((String, st) -> (Bool, String, st)) -> st -> IO st
 interact' f state = do
   ans <- getLine
   let (continue, message, nState) = f (ans, state)
